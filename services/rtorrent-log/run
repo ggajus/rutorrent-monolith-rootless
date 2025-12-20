@@ -1,0 +1,15 @@
+#!/bin/sh
+exec tail -F /config/rtorrent.log | awk '{
+    cmd = "date -d @"$1" +\"[%Y-%m-%d %H:%M:%S]\""
+    cmd | getline tmstr
+    close(cmd)
+    
+    level = ($2 == "E") ? "[ERROR]" : ($2 == "W") ? "[WARN]" : "[INFO]"
+    hash = substr($3, 1, 6)
+
+    msg = ""
+    for (i=4; i<=NF; i++) msg = msg " " $i
+
+    printf "%s %s [%s]%s\n", tmstr, level, hash, msg
+    fflush()
+}'
