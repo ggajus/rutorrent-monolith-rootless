@@ -1,4 +1,4 @@
-ARG ALPINE_VER=3.21
+ARG ALPINE_VER=3.23
 ARG RUT_VER=v5.2.10
 ARG RT_VER=v0.16.5
 ARG DT_VER=v1.7.0
@@ -69,7 +69,7 @@ RUN apk add --no-cache \
 RUN ln -sf /usr/bin/php83 /usr/bin/php \
     && adduser -D -u 1000 ops \
     # Create necessary paths
-    && mkdir -p /run/ops /var/lib/nginx/tmp /var/log/nginx /downloads /etc/nitro
+    && mkdir -p /run/ops /var/lib/nginx/tmp /var/log/nginx /downloads /config /etc/nitro
 
 # Copy binaries and ruTorrent from builder
 COPY --from=builder /usr/local/bin/rtorrent /usr/bin/rtorrent
