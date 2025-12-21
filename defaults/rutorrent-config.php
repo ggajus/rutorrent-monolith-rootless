@@ -2,11 +2,7 @@
 // Connection to rTorrent
 $scgi_port = 0;
 $scgi_host = "unix:///run/ops/rtorrent.sock";
-
-// NEW: Silence PHP 8.3 warnings by defining these defaults
 $XMLRPCMountPoint = "/RPC2";
-$do_diagnostic = true;
-$log_file = "/run/ops/rutorrent.log";
 
 // External binary paths
 $pathToExternals = array(
@@ -22,7 +18,7 @@ $pathToExternals = array(
     "dumptorrent" => "/usr/bin/dumptorrent",
 );
 
-// Other required defaults
+
 $localhosts = array("127.0.0.1", "localhost");
 $profilePath = "../share";
 $profileMask = 0777;
@@ -30,13 +26,10 @@ $tempDirectory = null;
 $canUseXSendFile = false;
 $locale = "en";
 
-// FIX: Absolute paths to stop the "torrents directory" error
-$topDirectory = '/'; 
-$profilePath = '/var/www/rutorrent/share';
+$topDirectory = "/downloads"; 
+$profilePath = "/config/rutorrent/share";
 $profileMask = 0777;
 
-// FIX: Silence PHP 8.3 warnings and fix diagnostic checks
 $do_diagnostic = true;
-$log_file = '/run/ops/rutorrent.log';
 $saveUploadedTorrents = true;
-$throttleMaxSpeed = 327625 * 1024; // Fixes throttle plugin failure
+$throttleMaxSpeed = 327625 * 1024;
