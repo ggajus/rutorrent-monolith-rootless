@@ -1,5 +1,5 @@
 #!/bin/sh
 
-rm -f /config/session/rtorrent.lock
+rm -f /config/rtorrent/.session/rtorrent.lock
 exec script -q -c "rtorrent -n -o import=/etc/rtorrent.rc" /dev/null > /dev/null
 2>&1

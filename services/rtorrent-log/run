@@ -1,5 +1,5 @@
 #!/bin/sh
-exec tail -F /config/rtorrent.log | awk '{
+exec tail -F /config/rtorrent/rtorrent.log | awk '{
     cmd = "date -d @"$1" +\"[%Y-%m-%d %H:%M:%S]\""
     cmd | getline tmstr
     close(cmd)

@@ -20,7 +20,8 @@ cd rutorrent-monolith
 
 ### 2. Create Required Mount Folders
 ```bash
-mkdir -p ./volumes/config/{.session,rutorrent,downloads}
+mkdir -p ./volumes/downloads
+mkdir -p ./volumes/config/rtorrent/.session
 mkdir -p ./volumes/config/rutorrent/share/{settings,torrents}
 ```
 

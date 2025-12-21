@@ -1,11 +1,11 @@
 # Folders
 method.insert = cfg.basedir,  private|const|string, (cat,"/config/")
 method.insert = cfg.download, private|const|string, (cat,"/downloads/")
-method.insert = cfg.session,  private|const|string, (cat,(cfg.basedir),".session/")
-directory.default.set = (cat, (cfg.download), "/temp")
+method.insert = cfg.session,  private|const|string, (cat,(cfg.basedir),"rtorrent/.session/")
 
-# Session files
 session.path.set = (cat, (cfg.session))
+
+# Save session every 5 minutes
 schedule2 = session_save, 1200, 300, ((session.save))
 
 system.umask.set = 0022
@@ -19,7 +19,7 @@ network.scgi.open_local = /run/ops/rtorrent.sock
 execute.nothrow = chmod, 770, /run/ops/rtorrent.sock
 
 # Logging
-log.open_file = "rtorrent_log", /config/rtorrent.log
+log.open_file = "rtorrent_log", /config/rtorrent/rtorrent.log
 log.add_output = "debug", "rtorrent_log"
 log.add_output = "error", "rtorrent_log"
 log.add_output = "critical", "rtorrent_log"
