@@ -4,7 +4,7 @@ ARG RT_VER=v0.16.5
 ARG DT_VER=v1.7.0
 ARG NITRO_VER=v0.6
 ARG UNRAR_VER=7.2.3
-ARG REMOVE_PLUGINS="rutracker_check _cloudflare spectrogram"
+ARG REMOVE_PLUGINS="rutracker_check _cloudflare"
 
 # ==========================================
 # STAGE 1: The Builder
@@ -55,28 +55,23 @@ RUN if [ -n "$REMOVE_PLUGINS" ]; then \
     fi
 
 # ==========================================
-# STAGE 2: Final Monolith
+# STAGE 2: Monolith
 # ==========================================
 FROM alpine:${ALPINE_VER}
 
-# 1. Consolidated Installation & User Setup
 RUN apk add --no-cache \
-    nginx curl ffmpeg mediainfo tzdata libstdc++ libgcc \
+    nginx curl ffmpeg mediainfo tzdata libstdc++ libgcc sox \
     ncurses-libs ncurses-terminfo-base zlib util-linux tini xmlrpc-c \
     php83 php83-fpm php83-ctype php83-session php83-json php83-mbstring \
     php83-sockets php83-posix php83-xml php83-simplexml php83-dom \
-    php83-curl php83-phar php83-openssl php83-zip \
-    && ln -sf /usr/bin/php83 /usr/bin/php \
+    php83-curl php83-phar php83-openssl php83-zip
+
+RUN ln -sf /usr/bin/php83 /usr/bin/php \
     && adduser -D -u 1000 ops \
     # Create necessary paths
-    && mkdir -p /run/ops /var/lib/nginx/tmp /var/log/nginx /config/session /downloads /etc/nitro /var/www/rutorrent/share/settings/rss/cache \
-       /var/www/rutorrent/share/torrents /var/www/rutorrent/share/settings /var/www/rutorrent/share/users \
-    && touch /var/www/rutorrent/share/settings/rss/cache/info \
-    # Symlink logs to stdout/stderr for Podman journald integration
-    && ln -sf /dev/stdout /var/log/nginx/access.log \
-    && ln -sf /dev/stderr /var/log/nginx/error.log
+    && mkdir -p /run/ops /var/lib/nginx/tmp /var/log/nginx /downloads /etc/nitro
 
-# 2. Copy binaries and ruTorrent from builder
+# Copy binaries and ruTorrent from builder
 COPY --from=builder /usr/local/bin/rtorrent /usr/bin/rtorrent
 COPY --from=builder /usr/local/bin/nitro* /usr/bin/
 COPY --from=builder /usr/local/lib/libtorrent.so* /usr/lib/
@@ -84,22 +79,22 @@ COPY --from=builder /tmp/dumptorrent/build/dumptorrent /usr/bin/dumptorrent
 COPY --from=builder /tmp/unrar /usr/bin/unrar
 COPY --from=builder --chown=ops:ops /tmp/rutorrent /var/www/rutorrent
 
-# 3. Apply patches and permissions
+# Apply patches and permissions
 RUN rm -rf /var/www/rutorrent/plugins/rutracker_check && \
-    sed -i 's/if(version_compare(\$xmlrpc_version,"1.11")<0)/if(false)/g' /var/www/rutorrent/php/getplugins.php && \
-    chown -R ops:ops /run/ops /var/lib/nginx /var/log/nginx /config /downloads /etc/nitro /var/www/rutorrent
+    chown -R ops:ops /run/ops /var/lib/nginx /var/log/nginx /config /downloads /etc/nitro /var/www/rutorrent && \
+    # Adjust autotools plugin watch folder check interval
+    sed -i "s/\$autowatch_interval = 300;/\$autowatch_interval = 15;/g" /var/www/rutorrent/plugins/autotools/conf.php
 
-# 4. Copy DEFAULT configs
+# Copy default configs
 COPY --chown=ops:ops defaults/nginx.conf /etc/nginx/nginx.conf
 COPY --chown=ops:ops defaults/php-fpm.conf /etc/php83/php-fpm.d/www.conf
 COPY --chown=ops:ops defaults/rutorrent-config.php /var/www/rutorrent/conf/config.php
 COPY --chown=ops:ops defaults/rtorrent.rc /etc/rtorrent.rc
 
-# 5. Setup Nitro Services
+# Setup Nitro Services
 COPY --chown=ops:ops services/ /etc/nitro/
 RUN chmod +x /etc/nitro/*/run
     
-
 USER ops
 WORKDIR /config
 ENV NITRO_SOCK=/run/ops/nitro.sock
