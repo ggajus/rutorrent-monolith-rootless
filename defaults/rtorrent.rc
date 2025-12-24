@@ -8,6 +8,8 @@ session.path.set = (cat, (cfg.session))
 # Save session every hour
 schedule2 = session_save, 300, 3600, ((session.save))
 
+# System settings
+system.daemon.set = true
 system.umask.set = 0022
 
 # Networking
