@@ -3,7 +3,7 @@ x-podman:
   
 services:
   rutorrent:
-    build: .
+    image: docker.io/ggajus/rutorrent-monolith-rootless
     container_name: rutorrent-monolith
     userns_mode: "keep-id:uid=1000,gid=1000"
     ports:
@@ -13,7 +13,7 @@ services:
       - ./volumes/config:/config
       - ./volumes/downloads:/downloads
     environment:
-      #AUTH_LEVEL: ALL # "ALL" or "WEBUI"
+      #AUTH_LEVEL: ALL # "ALL", "WEBUI" or "RPC2"
       #HTTP_USERNAME: test
       #HTTP_PASSWORD: test
     restart: unless-stopped

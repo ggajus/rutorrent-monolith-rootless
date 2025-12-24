@@ -10,12 +10,12 @@ A lightweight, fully rootless Podman/Docker container running rTorrent and ruTor
 - **No Python**: the `rutracker_check` and `_cloudflare` default plugins have been removed for a smaller image
 
 ## Quick Start
-Currently the image is required to be built locally.
+The built image can be downloaded from [Docker Hub](https://hub.docker.com/r/ggajus/rutorrent-monolith-rootless)
 
-### 1. Clone Repo
+### 1. Download Docker Compose File
 ```bash
-git clone https://codeberg.org/gajus/rutorrent-monolith.git
-cd rutorrent-monolith
+mkdir rutorrent-monolith && cd rutorrent-monolith
+wget https://codeberg.org/gajus/rutorrent-monolith-rootless/raw/branch/main/compose.yml
 ```
 
 ### 2. Create Required Mount Folders
@@ -44,7 +44,7 @@ ruTorrent is then reachable at `http://localhost:8080`.
 ## Ports
 - `6881`: rTorrent DHT
 - `8080`: ruTorrent web UI
-- `50000`: rTorrent DHT/incoming
+- `50000`: rTorrent incoming
 
 ## Configuration
 
@@ -59,7 +59,7 @@ The image includes a minimal rTorrent rc configuration file. All further configu
 | :--- | :--- | :--- |
 | `HTTP_USERNAME` | Username for HTTP Basic Authentication. | (None) |
 | `HTTP_PASSWORD` | Password for HTTP Basic Authentication. | (None) |
-| `AUTH_LEVEL` | Scope of protection: `WEBUI`, `RPC2`, or `ALL`. | (None) |
+| `AUTH_LEVEL` | HTTP Basic Auth Scope: `WEBUI`, `RPC2`, or `ALL`. | (None) |
 
 ## Notes
 This container is under active development, expect breaking changes and instability for now. If you don’t need a rootless setup, the [CrazyMax image](https://github.com/crazy-max/docker-rtorrent-rutorrent) remains the safer choice.
