@@ -64,7 +64,7 @@ RUN apk add --no-cache \
     ncurses-libs ncurses-terminfo-base zlib util-linux tini xmlrpc-c \
     php83 php83-fpm php83-ctype php83-session php83-json php83-mbstring \
     php83-sockets php83-posix php83-xml php83-simplexml php83-dom \
-    php83-curl php83-phar php83-openssl php83-zip
+    php83-curl php83-phar php83-openssl php83-zip apache2-utils
 
 RUN ln -sf /usr/bin/php83 /usr/bin/php \
     && adduser -D -u 1000 ops \
@@ -83,7 +83,9 @@ COPY --from=builder --chown=ops:ops /tmp/rutorrent /var/www/rutorrent
 RUN rm -rf /var/www/rutorrent/plugins/rutracker_check && \
     chown -R ops:ops /run/ops /var/lib/nginx /var/log/nginx /config /downloads /etc/nitro /var/www/rutorrent && \
     # Adjust autotools plugin watch folder check interval
-    sed -i "s/\$autowatch_interval = 300;/\$autowatch_interval = 15;/g" /var/www/rutorrent/plugins/autotools/conf.php
+    sed -i "s/\$autowatch_interval = 300;/\$autowatch_interval = 15;/g" /var/www/rutorrent/plugins/autotools/conf.php && \
+    # Prevent Nginx from passing the username to PHP (keep ruTorrent in single user mode)
+    sed -i '/REMOTE_USER/d' /etc/nginx/fastcgi_params
 
 # Copy default configs
 COPY --chown=ops:ops defaults/nginx.conf /etc/nginx/nginx.conf

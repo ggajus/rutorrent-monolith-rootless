@@ -12,4 +12,8 @@ services:
     volumes:
       - ./volumes/config:/config
       - ./volumes/downloads:/downloads
+    environment:
+      #AUTH_LEVEL: ALL # "ALL" or "WEBUI"
+      #HTTP_USERNAME: test
+      #HTTP_PASSWORD: test
     restart: unless-stopped

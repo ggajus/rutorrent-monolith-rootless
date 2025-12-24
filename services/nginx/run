@@ -1,3 +1,37 @@
 #!/bin/sh
 
+WEB_CONF="/run/ops/auth_web.conf"
+RPC_CONF="/run/ops/auth_rpc.conf"
+HTPASSWD="/run/ops/.htpasswd"
+
+# Initialize both as empty (no auth)
+echo "" > "$WEB_CONF"
+echo "" > "$RPC_CONF"
+
+if [ -n "$HTTP_USERNAME" ] && [ -n "$HTTP_PASSWORD" ]; then
+    # Generate the password file
+    htpasswd -cb "$HTPASSWD" "$HTTP_USERNAME" "$HTTP_PASSWORD"
+    
+    AUTH_STR="auth_basic \"Restricted\"; auth_basic_user_file $HTPASSWD;"
+
+    case "${AUTH_LEVEL}" in
+        "WEBUI")
+            echo "$AUTH_STR" > "$WEB_CONF"
+            echo "Auth enabled for Web UI only."
+            ;;
+        "RPC2")
+            echo "$AUTH_STR" > "$RPC_CONF"
+            echo "Auth enabled for RPC2 only."
+            ;;
+        "ALL")
+            echo "$AUTH_STR" > "$WEB_CONF"
+            echo "$AUTH_STR" > "$RPC_CONF"
+            echo "Auth enabled for RPC2 and Web UI"
+            ;;
+        *)
+            echo "AUTH_LEVEL not set or invalid, defaulting to no auth."
+            ;;
+    esac
+fi
+
 exec nginx

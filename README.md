@@ -54,7 +54,14 @@ ruTorrent is then reachable at `http://localhost:8080`.
 
 The image includes a minimal rTorrent rc configuration file. All further configuration should be be done through `/config/rtorrent.custom` mounted from the host. A template is provided at the root of this repo.
 
+### Environment Variables
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `HTTP_USERNAME` | Username for HTTP Basic Authentication. | (None) |
+| `HTTP_PASSWORD` | Password for HTTP Basic Authentication. | (None) |
+| `AUTH_LEVEL` | Scope of protection: `WEBUI`, `RPC2`, or `ALL`. | (None) |
+
 ## Notes
-This container is under active development, expect breaking changes, instability and lack of features until the first stable tag. If you don’t need a rootless setup, the [CrazyMax image](https://github.com/crazy-max/docker-rtorrent-rutorrent) remains the safer choice.
+This container is under active development, expect breaking changes and instability for now. If you don’t need a rootless setup, the [CrazyMax image](https://github.com/crazy-max/docker-rtorrent-rutorrent) remains the safer choice.
 ## Credits
 Inspired by [CrazyMax’s rtorrent-rutorrent image](https://github.com/crazy-max/docker-rtorrent-rutorrent) and [home-operations containers](https://github.com/home-operations/containers).
