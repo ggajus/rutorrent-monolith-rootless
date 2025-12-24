@@ -5,12 +5,13 @@ method.insert = cfg.session,  private|const|string, (cat,(cfg.basedir),"rtorrent
 directory.default.set = (cat, (cfg.download))
 session.path.set = (cat, (cfg.session))
 
-# Save session every 5 minutes
-schedule2 = session_save, 1200, 300, ((session.save))
+# Save session every hour
+schedule2 = session_save, 300, 3600, ((session.save))
 
 system.umask.set = 0022
 
 # Networking
+dht.port.set = 6881
 network.port_range.set = 50000-50000
 network.port_random.set = no
 

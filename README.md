@@ -34,14 +34,15 @@ podman compose up
 ```bash
 docker compose up
 ```
-ruTorrent is then reachable at `http://localhost:8080` .
+ruTorrent is then reachable at `http://localhost:8080`.
+
 ## Volumes
 
 - `/downloads`: Default download location for torrents
 - `/config`: State directory (sessions, settings, state files)
 
 ## Ports
-
+- `6881`: rTorrent DHT
 - `8080`: ruTorrent web UI
 - `50000`: rTorrent DHT/incoming
 
@@ -50,6 +51,8 @@ ruTorrent is then reachable at `http://localhost:8080` .
 - rTorrent config: `/etc/rtorrent.rc` (imports rutorrent.custom from /config)
 - ruTorrent config: `/var/www/rutorrent/conf/config.php`
 - Nginx config: `/etc/nginx/nginx.conf`
+
+The image includes a minimal rTorrent rc configuration file. All further configuration should be be done through `/config/rtorrent.custom` mounted from the host. A template is provided at the root of this repo.
 
 ## Notes
 This container is under active development, expect breaking changes, instability and lack of features until the first stable tag. If you don’t need a rootless setup, the [CrazyMax image](https://github.com/crazy-max/docker-rtorrent-rutorrent) remains the safer choice.
