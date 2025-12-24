@@ -10,7 +10,8 @@ echo "" > "$RPC_CONF"
 
 if [ -n "$HTTP_USERNAME" ] && [ -n "$HTTP_PASSWORD" ]; then
     # Generate the password file
-    htpasswd -cb "$HTPASSWD" "$HTTP_USERNAME" "$HTTP_PASSWORD"
+    #htpasswd -cb "$HTPASSWD" "$HTTP_USERNAME" "$HTTP_PASSWORD"
+    printf "%s:%s\n" "$HTTP_USERNAME" "$(mkpasswd -m sha-512 "$HTTP_PASSWORD")" > "$HTPASSWD"
     
     AUTH_STR="auth_basic \"Restricted\"; auth_basic_user_file $HTPASSWD;"
 
