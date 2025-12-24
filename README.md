@@ -7,7 +7,7 @@ A lightweight, fully rootless Podman/Docker container running rTorrent and ruTor
 - **Fully Rootless**: runs as user `ops` (UID 1000) from container start
 - **Configurable rtorrent.rc**: a minimal default configuration imports `rutorrent.custom` from `/config`
 - **Persistent RuTorrent and plugin settings**: all ruTorrent state data resides under `/config/rutorrent`
-- **No Python**: the `rutracker_check` and `_cloudflare` default plugins have been removed for a smaller image
+- **Tiny Size**: rarely used plugins like `rutracker_check`, `_cloudflare` or `spectrogram` have been removed with their dependencies for a smaller image size
 
 ## Quick Start
 The built image can be downloaded from [Docker Hub](https://hub.docker.com/r/ggajus/rutorrent-monolith-rootless)
