@@ -2,9 +2,9 @@
 
 ARG ALPINE_VER=3.23
 ARG RUT_VER=v5.2.10
-ARG RT_VER=v0.16.5
+ARG RT_VER=v0.16.7
 ARG DT_VER=v1.7.0
-ARG NITRO_VER=v0.7.1
+ARG NITRO_VER=v0.8
 ARG UNRAR_VER=7.2.3
 ARG REMOVE_PLUGINS="rutracker_check _cloudflare mediainfo screenshots spectrogram geoip"
 
