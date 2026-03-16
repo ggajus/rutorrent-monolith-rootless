@@ -2,12 +2,14 @@
 
 A lightweight, fully rootless Podman/Docker container running rTorrent and ruTorrent. This container runs entirely as a non-root user without any initialization processes that start as root and drop privileges, in contrast to alternatives that use init systems like s6-overlay.
 
+> **Note:** Active development, issues, and pull requests for this project are hosted on [Codeberg](https://codeberg.org/gajus/rutorrent-monolith-rootless). The GitHub repository is maintained solely as an automated mirror.
+
 ## Features
 
 - **Fully Rootless**: runs as user `ops` (UID 1000) from container start
 - **Configurable rtorrent.rc**: a minimal default configuration imports `rutorrent.custom` from `/config`
 - **Persistent RuTorrent and plugin settings**: all ruTorrent state data resides under `/config/rutorrent`
-- **Tiny Size**: rarely used plugins like `rutracker_check`, `_cloudflare` or `spectrogram` have been removed with their dependencies for a smaller image size
+- **Tiny Size**: rarely used plugins like `rutracker_check`, `_cloudflare` or `spectrogram` have been removed with their dependencies for a smaller image size (16 MB)
 
 ## Quick Start
 The built image can be downloaded from [Docker Hub](https://hub.docker.com/r/ggajus/rutorrent-monolith-rootless)
@@ -61,7 +63,5 @@ The image includes a minimal rTorrent rc configuration file. All further configu
 | `HTTP_PASSWORD` | Password for HTTP Basic Authentication. | (None) |
 | `AUTH_LEVEL` | HTTP Basic Auth Scope: `WEBUI`, `RPC2`, or `ALL`. | (None) |
 
-## Notes
-This container is under active development, expect breaking changes and instability for now. If you don’t need a rootless setup, the [CrazyMax image](https://github.com/crazy-max/docker-rtorrent-rutorrent) remains the safer choice.
 ## Credits
 Inspired by [CrazyMax’s rtorrent-rutorrent image](https://github.com/crazy-max/docker-rtorrent-rutorrent) and [home-operations containers](https://github.com/home-operations/containers).
