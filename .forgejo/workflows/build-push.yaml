@@ -3,7 +3,7 @@ name: Build and Push Docker Image
 on:
   push:
     tags:
-      - 'v*'  
+      - 'v*'
   pull_request:
     branches:
       - 'main'
@@ -12,13 +12,28 @@ env:
   REGISTRY: docker.io
   IMAGE_NAME: ggajus/rutorrent-monolith-rootless
 
+  # Receives :latest tag, tested to be working
+  STABLE_RT_VER: v0.16.11
+
 jobs:
   build:
     runs-on: docker
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set Docker channel
+        id: channel
+        shell: sh
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "channel=ci" >> "$GITHUB_OUTPUT"
+          elif echo "${{ github.ref_name }}" | grep -q -- "-${STABLE_RT_VER}-"; then
+            echo "channel=latest" >> "$GITHUB_OUTPUT"
+          else
+            echo "channel=unstable" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -35,9 +50,12 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=false
           tags: |
             type=ref,event=tag
-            type=raw,value=latest
+            type=raw,value=${{ steps.channel.outputs.channel }},enable=${{ github.event_name != 'pull_request' }}
+            type=raw,value=ci,enable=${{ github.event_name == 'pull_request' }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
