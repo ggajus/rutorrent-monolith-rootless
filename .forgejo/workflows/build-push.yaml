@@ -11,6 +11,8 @@ on:
 env:
   REGISTRY: docker.io
   IMAGE_NAME: ggajus/rutorrent-monolith-rootless
+  BUILDX_CACHE_DIR: /buildx-cache/rutorrent-monolith-rootless
+  BUILDX_CACHE_NEW_DIR: /buildx-cache/rutorrent-monolith-rootless-new
 
   # Receives :latest tag, tested to be working
   STABLE_RT_VER: v0.16.11
@@ -45,6 +47,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Check cache mount
+        run: |
+          id
+          df -h /buildx-cache || true
+          touch /buildx-cache/test-write
+          ls -la /buildx-cache
+
       - name: Docker Meta
         id: meta
         uses: docker/metadata-action@v5
@@ -57,6 +66,11 @@ jobs:
             type=raw,value=${{ steps.channel.outputs.channel }},enable=${{ github.event_name != 'pull_request' }}
             type=raw,value=ci,enable=${{ github.event_name == 'pull_request' }}
 
+      - name: Prepare local Buildx cache
+        run: |
+          mkdir -p "${BUILDX_CACHE_DIR}"
+          rm -rf "${BUILDX_CACHE_NEW_DIR}"
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -66,5 +80,14 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
-          cache-from: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ env.IMAGE_NAME }}:buildcache,mode=max
+          cache-from: type=local,src=${{ env.BUILDX_CACHE_DIR }}
+          cache-to: type=local,dest=${{ env.BUILDX_CACHE_NEW_DIR }},mode=max
+
+      - name: Promote local Buildx cache
+        if: always()
+        run: |
+          if [ -d "${BUILDX_CACHE_NEW_DIR}" ]; then
+            rm -rf "${BUILDX_CACHE_DIR}"
+            mv "${BUILDX_CACHE_NEW_DIR}" "${BUILDX_CACHE_DIR}"
+          fi
+            
