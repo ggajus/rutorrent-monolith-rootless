@@ -47,13 +47,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Check cache mount
-        run: |
-          id
-          df -h /buildx-cache || true
-          touch /buildx-cache/test-write
-          ls -la /buildx-cache
-
       - name: Docker Meta
         id: meta
         uses: docker/metadata-action@v5
