@@ -2,7 +2,7 @@
 
 ARG ALPINE_VER=3.23
 ARG RUT_VER=v5.3.1
-ARG RT_VER=v0.16.12
+ARG RT_VER=v0.16.13
 ARG DT_VER=v1.7.0
 ARG NITRO_VER=v0.8.1
 ARG UNRAR_VER=7.2.3
@@ -27,7 +27,7 @@ RUN <<EOF
   git clone --depth 1 --branch ${RT_VER} https://github.com/rakshasa/libtorrent.git
   cd libtorrent
   autoreconf -ivf
-  ./configure --disable-debug --enable-aligned --enable-static --disable-shared CXXFLAGS="-std=c++17 -Os -flto"
+  ./configure --disable-debug --enable-aligned --enable-static --disable-shared CXXFLAGS="-std=c++20 -Os -flto"
   make -j$(nproc)
   make install
   cd ..
@@ -36,7 +36,7 @@ RUN <<EOF
   git clone --depth 1 --branch ${RT_VER} https://github.com/rakshasa/rtorrent.git
   cd rtorrent
   autoreconf -ivf
-  ./configure --with-xmlrpc-tinyxml2 CXXFLAGS="-std=c++17 -Os -flto"
+  ./configure --with-xmlrpc-tinyxml2 CXXFLAGS="-std=c++20 -Os -flto"
   make -j$(nproc)
   make install
   strip --strip-all /usr/local/bin/rtorrent
