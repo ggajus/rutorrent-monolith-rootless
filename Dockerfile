@@ -14,15 +14,15 @@ ARG REMOVE_PLUGINS="rutracker_check _cloudflare mediainfo screenshots spectrogra
 FROM alpine:${ALPINE_VER} AS builder
 
 RUN apk add --no-cache git build-base linux-headers automake autoconf libtool pkgconf \
-  curl-dev ncurses-dev openssl-dev zlib-dev xmlrpc-c-dev cmake curl jq
+  curl-dev ncurses-dev openssl-dev zlib-dev xmlrpc-c-dev cmake curl
 
 WORKDIR /tmp
 
 # Build Libtorrent & rTorrent
-ARG RT_VER 
+ARG RT_VER
 RUN <<EOF
   set -e
-  
+
   # --- Libtorrent ---
   git clone --depth 1 --branch ${RT_VER} https://github.com/rakshasa/libtorrent.git
   cd libtorrent
@@ -31,7 +31,7 @@ RUN <<EOF
   make -j$(nproc)
   make install
   cd ..
-  
+
   # --- rTorrent ---
   git clone --depth 1 --branch ${RT_VER} https://github.com/rakshasa/rtorrent.git
   cd rtorrent
@@ -47,8 +47,8 @@ ARG NITRO_VER
 RUN <<EOF
   set -e
   git clone --depth 1 --branch ${NITRO_VER} https://github.com/leahneukirchen/nitro.git
-  cd nitro 
-  make 
+  cd nitro
+  make
   cp nitro nitroctl /usr/local/bin/
   strip --strip-all /usr/local/bin/nitro /usr/local/bin/nitroctl
   cd ..
@@ -62,21 +62,25 @@ RUN <<EOF
   cd dumptorrent
   # Patching missing header for Musl compatibility
   sed -i '1i #include <sys/time.h>' src/scrapec.c
-  
+
   cmake -B build -DCMAKE_BUILD_TYPE=Release -S .
   cmake --build build --parallel $(nproc)
   strip --strip-all build/dumptorrent
 EOF
 
-# Download Unrar
+# Build Unrar
 ARG UNRAR_VER
 RUN <<EOF
   set -e
 
-  DOWNLOAD_URL=$(curl -LsSf https://api.github.com/repos/EDM115/unrar-alpine/releases/tags/${UNRAR_VER} | jq -r '.assets[] | select(.name == "unrar") | .browser_download_url')
-  
-  curl -Lsf -o /tmp/unrar "$DOWNLOAD_URL"
-  chmod +x /tmp/unrar
+  curl -Lsf -o /tmp/unrarsrc.tar.gz "https://www.rarlab.com/rar/unrarsrc-${UNRAR_VER}.tar.gz"
+  mkdir -p /tmp/unrar-src
+  tar -xzf /tmp/unrarsrc.tar.gz -C /tmp/unrar-src --strip-components=1
+
+  cd /tmp/unrar-src
+  make -j$(nproc) -f makefile
+
+  install -m755 unrar /tmp/unrar
   strip --strip-all /tmp/unrar
 EOF
 
@@ -95,7 +99,7 @@ RUN <<EOF
 
   # Clean up unused data
   rm -rf /tmp/rutorrent/.git* /tmp/rutorrent/.vscode /tmp/rutorrent/tests
-  
+
   # Remove all themes except Oblivion
   find /tmp/rutorrent/plugins/theme/themes -mindepth 1 -maxdepth 1 ! -name "Oblivion" -exec rm -rf {} +
 EOF
@@ -149,11 +153,11 @@ RUN <<EOF
   # Make service runners executable
   chmod +x /etc/nitro/*/run
 EOF
-  
+
 USER ops
 WORKDIR /config
 ENV NITRO_SOCK=/run/ops/nitro.sock
 ENV TERM=dumb
-EXPOSE 8080 6881 50000 
+EXPOSE 8080 6881 50000
 
 ENTRYPOINT ["/usr/bin/nitro", "/etc/nitro"]
