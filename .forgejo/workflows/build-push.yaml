@@ -10,6 +10,10 @@ on:
     branches:
       - 'main'
 
+concurrency:
+  group: docker-${{ forgejo.ref }}
+  cancel-in-progress: false
+
 env:
   IMAGE_NAME: ggajus/rutorrent-monolith-rootless
   BUILDX_CACHE_DIR: /buildx-cache/rutorrent-monolith-rootless
@@ -42,18 +46,13 @@ jobs:
         shell: sh
         run: |
           set -eu
-
-          if [ "${{ forgejo.ref_type }}" = "tag" ]; then
-            echo "tag=${IMAGE_NAME}:${{ forgejo.ref_name }}-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "tag=${IMAGE_NAME}:ci-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
-          fi
+          echo "tag=${IMAGE_NAME}:ci-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Log into Docker Hub
-        if: forgejo.event_name != 'pull_request'
+        if: forgejo.ref_type == 'tag'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -64,19 +63,51 @@ jobs:
           mkdir -p "${BUILDX_CACHE_DIR}-${{ matrix.arch }}"
           rm -rf "${BUILDX_CACHE_NEW_DIR}-${{ matrix.arch }}"
 
-      - name: Build and push Docker image
+      - name: Build Docker image
+        if: forgejo.ref_type != 'tag'
         uses: docker/build-push-action@v5
         with:
           context: .
           file: Dockerfile
-          push: ${{ forgejo.ref_type == 'tag' }}
+          push: false
           tags: ${{ steps.tag.outputs.tag }}
           platforms: linux/${{ matrix.arch }}
           cache-from: type=local,src=${{ env.BUILDX_CACHE_DIR }}-${{ matrix.arch }}
           cache-to: type=local,dest=${{ env.BUILDX_CACHE_NEW_DIR }}-${{ matrix.arch }},mode=max
 
+      - name: Build and push Docker image by digest
+        if: forgejo.ref_type == 'tag'
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/${{ matrix.arch }}
+          outputs: type=image,name=${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=local,src=${{ env.BUILDX_CACHE_DIR }}-${{ matrix.arch }}
+          cache-to: type=local,dest=${{ env.BUILDX_CACHE_NEW_DIR }}-${{ matrix.arch }},mode=max
+
+      - name: Export digest
+        if: forgejo.ref_type == 'tag'
+        shell: sh
+        run: |
+          set -eu
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          digest="${digest#sha256:}"
+          touch "/tmp/digests/${digest}"
+
+      - name: Upload digest
+        if: forgejo.ref_type == 'tag'
+        uses: https://code.forgejo.org/forgejo/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.arch }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Promote local Buildx cache
-        if: ${{ forgejo.ref_type == 'tag' && success() }}
+        if: ${{ success() }}
         run: |
           if [ -d "${BUILDX_CACHE_NEW_DIR}-${{ matrix.arch }}" ]; then
             rm -rf "${BUILDX_CACHE_DIR}-${{ matrix.arch }}"
@@ -95,6 +126,8 @@ jobs:
         id: channel
         shell: sh
         run: |
+          set -eu
+
           if echo "${{ forgejo.ref_name }}" | grep -Fq -- "-${STABLE_RT_VER}-"; then
             echo "channel=latest" >> "$GITHUB_OUTPUT"
           else
@@ -110,18 +143,32 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Publish version manifest
+      - name: Download digests
+        uses: https://code.forgejo.org/forgejo/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Publish manifests
+        shell: sh
         run: |
+          set -eu
+
+          sources=""
+          for digest_file in /tmp/digests/*; do
+            digest="$(basename "$digest_file")"
+            sources="$sources ${IMAGE_NAME}@sha256:${digest}"
+          done
+
+          # shellcheck disable=SC2086
           docker buildx imagetools create \
             -t "${IMAGE_NAME}:${{ forgejo.ref_name }}" \
-            "${IMAGE_NAME}:${{ forgejo.ref_name }}-amd64" \
-            "${IMAGE_NAME}:${{ forgejo.ref_name }}-arm64"
-
-      - name: Publish channel manifest
-        run: |
-          docker buildx imagetools create \
             -t "${IMAGE_NAME}:${{ steps.channel.outputs.channel }}" \
-            "${IMAGE_NAME}:${{ forgejo.ref_name }}-amd64" \
-            "${IMAGE_NAME}:${{ forgejo.ref_name }}-arm64"
+            $sources
 
+      - name: Inspect published manifests
+        run: |
+          docker buildx imagetools inspect "${IMAGE_NAME}:${{ forgejo.ref_name }}"
+          docker buildx imagetools inspect "${IMAGE_NAME}:${{ steps.channel.outputs.channel }}"
 
