@@ -38,6 +38,22 @@ docker compose up
 ```
 ruTorrent is then reachable at `http://localhost:8080`.
 
+## Image Tags
+
+Images are tagged using the format:
+
+```text
+v<rutorrent-version>-v<rtorrent-version>-r<revision>
+```
+
+Example:
+
+```text
+v5.3.1-v0.16.11-r1
+```
+
+The `latest` tag points to the latest tested stable version. The `unstable` tag points to the newest ruTorrent/rTorrent combination, which may not be reliable.
+
 ## Volumes
 
 - `/downloads`: Default download location for torrents
