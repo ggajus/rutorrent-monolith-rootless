@@ -14,7 +14,7 @@ ARG REMOVE_PLUGINS="rutracker_check _cloudflare mediainfo screenshots spectrogra
 FROM alpine:${ALPINE_VER} AS builder
 
 RUN apk add --no-cache git build-base linux-headers automake autoconf libtool pkgconf \
-  curl-dev ncurses-dev openssl-dev zlib-dev xmlrpc-c-dev cmake curl jq
+  curl-dev ncurses-dev openssl-dev zlib-dev xmlrpc-c-dev cmake curl
 
 WORKDIR /tmp
 
@@ -68,15 +68,19 @@ RUN <<EOF
   strip --strip-all build/dumptorrent
 EOF
 
-# Download Unrar
+# Build Unrar
 ARG UNRAR_VER
 RUN <<EOF
   set -e
 
-  DOWNLOAD_URL=$(curl -LsSf https://api.github.com/repos/EDM115/unrar-alpine/releases/tags/${UNRAR_VER} | jq -r '.assets[] | select(.name == "unrar") | .browser_download_url')
+  curl -Lsf -o /tmp/unrarsrc.tar.gz "https://www.rarlab.com/rar/unrarsrc-${UNRAR_VER}.tar.gz"
+  mkdir -p /tmp/unrar-src
+  tar -xzf /tmp/unrarsrc.tar.gz -C /tmp/unrar-src --strip-components=1
 
-  curl -Lsf -o /tmp/unrar "$DOWNLOAD_URL"
-  chmod +x /tmp/unrar
+  cd /tmp/unrar-src
+  make -j$(nproc) -f makefile
+
+  install -m755 unrar /tmp/unrar
   strip --strip-all /tmp/unrar
 EOF
 
@@ -157,3 +161,4 @@ ENV TERM=dumb
 EXPOSE 8080 6881 50000
 
 ENTRYPOINT ["/usr/bin/nitro", "/etc/nitro"]
+
