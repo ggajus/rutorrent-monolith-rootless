@@ -35,22 +35,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set Docker tags
-        id: tags
+      - name: Set Docker tag
+        id: tag
         shell: sh
         run: |
           if [ "${{ forgejo.event_name }}" = "pull_request" ]; then
-            {
-              echo "tags<<EOF"
-              echo "${IMAGE_NAME}:ci-${{ matrix.arch }}"
-              echo "EOF"
-            } >> "$GITHUB_OUTPUT"
+            echo "tag=${IMAGE_NAME}:ci-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
           else
-            {
-              echo "tags<<EOF"
-              echo "${IMAGE_NAME}:${{ forgejo.ref_name }}-${{ matrix.arch }}"
-              echo "EOF"
-            } >> "$GITHUB_OUTPUT"
+            echo "tag=${IMAGE_NAME}:${{ forgejo.ref_name }}-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Set up Docker Buildx
@@ -74,7 +66,7 @@ jobs:
           context: .
           file: Dockerfile
           push: ${{ forgejo.event_name != 'pull_request' }}
-          tags: ${{ steps.tags.outputs.tags }}
+          tags: ${{ steps.tag.outputs.tag }}
           platforms: linux/${{ matrix.arch }}
           cache-from: type=local,src=${{ env.BUILDX_CACHE_DIR }}-${{ matrix.arch }}
           cache-to: type=local,dest=${{ env.BUILDX_CACHE_NEW_DIR }}-${{ matrix.arch }},mode=max
