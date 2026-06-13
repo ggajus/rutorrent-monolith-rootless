@@ -2,6 +2,8 @@ name: Build and Push Docker Image
 
 on:
   push:
+    branches:
+      - 'release/**'
     tags:
       - 'v*'
   pull_request:
@@ -39,10 +41,12 @@ jobs:
         id: tag
         shell: sh
         run: |
-          if [ "${{ forgejo.event_name }}" = "pull_request" ]; then
-            echo "tag=${IMAGE_NAME}:ci-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
-          else
+          set -eu
+
+          if [ "${{ forgejo.ref_type }}" = "tag" ]; then
             echo "tag=${IMAGE_NAME}:${{ forgejo.ref_name }}-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${IMAGE_NAME}:ci-${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Set up Docker Buildx
@@ -65,14 +69,14 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          push: ${{ forgejo.event_name != 'pull_request' }}
+          push: ${{ forgejo.ref_type == 'tag' }}
           tags: ${{ steps.tag.outputs.tag }}
           platforms: linux/${{ matrix.arch }}
           cache-from: type=local,src=${{ env.BUILDX_CACHE_DIR }}-${{ matrix.arch }}
           cache-to: type=local,dest=${{ env.BUILDX_CACHE_NEW_DIR }}-${{ matrix.arch }},mode=max
 
       - name: Promote local Buildx cache
-        if: ${{ forgejo.event_name != 'pull_request' && success() }}
+        if: ${{ forgejo.ref_type == 'tag' && success() }}
         run: |
           if [ -d "${BUILDX_CACHE_NEW_DIR}-${{ matrix.arch }}" ]; then
             rm -rf "${BUILDX_CACHE_DIR}-${{ matrix.arch }}"
@@ -81,7 +85,7 @@ jobs:
 
   publish:
     name: Publish multi-arch manifest
-    if: forgejo.event_name != 'pull_request'
+    if: forgejo.ref_type == 'tag'
     needs:
       - build
     runs-on: docker-amd64
