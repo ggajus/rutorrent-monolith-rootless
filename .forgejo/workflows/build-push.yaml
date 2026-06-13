@@ -35,18 +35,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set Docker channel
-        id: channel
-        shell: sh
-        run: |
-          if [ "${{ forgejo.event_name }}" = "pull_request" ]; then
-            echo "channel=ci" >> "$GITHUB_OUTPUT"
-          elif echo "${{ forgejo.ref_name }}" | grep -Fq -- "-${STABLE_RT_VER}-"; then
-            echo "channel=latest" >> "$GITHUB_OUTPUT"
-          else
-            echo "channel=unstable" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Set Docker tags
         id: tags
         shell: sh
