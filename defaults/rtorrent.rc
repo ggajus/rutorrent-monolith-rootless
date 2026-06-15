@@ -6,7 +6,7 @@ directory.default.set = (cat, (cfg.download))
 session.path.set = (cat, (cfg.session))
 
 # Save session every hour
-schedule2 = session_save, 300, 3600, ((session.save))
+schedule = session_save, 300, 3600, ((session.save))
 
 # System settings
 system.daemon.set = true
@@ -26,9 +26,6 @@ log.open_file = "rtorrent_log", /config/rtorrent/rtorrent.log
 log.add_output = "debug", "rtorrent_log"
 log.add_output = "error", "rtorrent_log"
 log.add_output = "critical", "rtorrent_log"
-
-# Filename encoding
-encoding.add = UTF-8
 
 # Import custom rtorrent.rc
 try_import = /config/rtorrent.custom

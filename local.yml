@@ -1,14 +1,16 @@
 x-podman:
   in_pod: false
-  
+
 services:
   rutorrent:
     image: ggajus/rutorrent-monolith-rootless:local
+    pull_policy: build
     build:
       context: .
       dockerfile: Dockerfile
     container_name: rutorrent-monolith
     userns_mode: "keep-id:uid=1000,gid=1000"
+    network_mode: "pasta"
     ports:
       - "8080:8080"
       - "50000:50000"

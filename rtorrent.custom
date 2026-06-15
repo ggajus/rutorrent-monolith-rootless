@@ -4,7 +4,7 @@
 #   - https://github.com/rakshasa/rtorrent/wiki/CONFIG-Template
 
 # Prevent downloading when empty disk space lowd
-schedule2 = low_diskspace,5,60,((close_low_diskspace,10G))
+schedule = low_diskspace,5,60,((close_low_diskspace,10G))
 
 # Allow encryption
 protocol.encryption.set = allow_incoming,try_outgoing,enable_retry
@@ -45,7 +45,7 @@ network.max_open_sockets.set = 999
 network.max_open_files.set = 600
 
 # Maximum number of simultaneous HTTP request (used by announce or scrape requests) Default: `32`
-network.http.max_open.set = 99
+network.http.max_total_connections.set = 99
 
 # Send and receive buffer size for socket. Disabled by default (`0`), this means the default is used by OS 
 #  (you have to modify the system wide settings!)
@@ -69,9 +69,6 @@ network.http.dns_cache_timeout.set = 25
 
 # Max packet size using xmlrpc. Default: `524288`
 network.xmlrpc.size_limit.set = 2M
-
-# Prune file status in every 24 hours, this is the default setting.
-#schedule2 = prune_file_status, 3600, 86400, ((system.file_status_cache.prune))
 
 # Whether to allocate disk space for a new torrent. Default: `0`
 #system.file.allocate.set = 0
