@@ -19,9 +19,6 @@ env:
   BUILDX_CACHE_DIR: /buildx-cache/rutorrent-monolith-rootless
   BUILDX_CACHE_NEW_DIR: /buildx-cache/rutorrent-monolith-rootless-new
 
-  # Receives :latest tag, tested to be working
-  STABLE_RT_VER: v0.16.11
-
 jobs:
   build:
     name: Build ${{ matrix.arch }}
@@ -122,18 +119,6 @@ jobs:
     runs-on: docker-amd64
 
     steps:
-      - name: Set Docker channel
-        id: channel
-        shell: sh
-        run: |
-          set -eu
-
-          if echo "${{ forgejo.ref_name }}" | grep -Fq -- "-${STABLE_RT_VER}-"; then
-            echo "channel=latest" >> "$GITHUB_OUTPUT"
-          else
-            echo "channel=unstable" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -164,11 +149,10 @@ jobs:
           # shellcheck disable=SC2086
           docker buildx imagetools create \
             -t "${IMAGE_NAME}:${{ forgejo.ref_name }}" \
-            -t "${IMAGE_NAME}:${{ steps.channel.outputs.channel }}" \
+            -t "${IMAGE_NAME}:unstable" \
             $sources
 
       - name: Inspect published manifests
         run: |
           docker buildx imagetools inspect "${IMAGE_NAME}:${{ forgejo.ref_name }}"
-          docker buildx imagetools inspect "${IMAGE_NAME}:${{ steps.channel.outputs.channel }}"
-
+          docker buildx imagetools inspect "${IMAGE_NAME}:unstable"
