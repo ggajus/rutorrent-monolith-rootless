@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  IMAGE_NAME: ggajus/test
+  IMAGE_NAME: ggajus/rutorrent-monolith-rootless
   BUILDX_CACHE_DIR: /buildx-cache/rutorrent-monolith-rootless
   BUILDX_CACHE_NEW_DIR: /buildx-cache/rutorrent-monolith-rootless-new
 
