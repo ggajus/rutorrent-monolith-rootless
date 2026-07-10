@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 ARG ALPINE_VER=3.23
-ARG RUT_VER=v5.3.5
+ARG RUT_VER=v5.3.6
 ARG RT_VER=v0.16.17
 ARG DT_VER=v1.7.0
 ARG NITRO_VER=v0.8.1
