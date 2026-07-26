@@ -14,8 +14,7 @@ system.umask.set = 0022
 
 # Networking
 dht.port.set = 6881
-network.port_range.set = 50000-50000
-network.port_random.set = no
+network.listen.port.set = 50000
 
 # SCGI Socket
 network.scgi.open_local = /run/ops/rtorrent.sock
