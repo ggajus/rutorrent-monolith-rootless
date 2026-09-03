@@ -16,6 +16,9 @@ FROM alpine:${ALPINE_VER} AS builder
 RUN apk add --no-cache git build-base linux-headers automake autoconf libtool pkgconf \
   curl-dev ncurses-dev openssl-dev zlib-dev xmlrpc-c-dev cmake curl
 
+# Temporary workaround for GitHub anonymous HTTP/2 clone failures
+RUN git config --global http.version HTTP/1.1
+
 WORKDIR /tmp
 
 # Build Libtorrent & rTorrent
