@@ -1,8 +1,8 @@
 # syntax=docker/dockerfile:1
 
 ARG ALPINE_VER=3.23
-ARG RUT_VER=v5.3.11
-ARG RT_VER=v0.16.19
+ARG RUT_VER=v5.3.13
+ARG RT_VER=v0.16.22
 ARG DT_VER=v1.7.0
 ARG NITRO_VER=v0.8.1
 ARG UNRAR_VER=7.2.3
@@ -15,6 +15,9 @@ FROM alpine:${ALPINE_VER} AS builder
 
 RUN apk add --no-cache git build-base linux-headers automake autoconf libtool pkgconf \
   curl-dev ncurses-dev openssl-dev zlib-dev xmlrpc-c-dev cmake curl
+
+# Temporary workaround for GitHub anonymous HTTP/2 clone failures
+RUN git config --global http.version HTTP/1.1
 
 WORKDIR /tmp
 
