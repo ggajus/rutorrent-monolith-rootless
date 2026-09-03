@@ -116,7 +116,7 @@ RUN apk add --no-cache \
   nginx libstdc++ libgcc zlib curl \
   php83-fpm php83-ctype php83-session php83-json php83-mbstring \
   php83-sockets php83-posix php83-xml php83-simplexml php83-dom \
-  php83-curl php83-phar php83-openssl php83-zip
+  php83-curl php83-phar php83-openssl php83-zip php83-fileinfo
 
 RUN <<EOF
   set -e
