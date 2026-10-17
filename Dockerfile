@@ -6,6 +6,7 @@ ARG RT_VER=v0.16.25
 ARG DT_VER=v1.7.0
 ARG NITRO_VER=v0.8.1
 ARG UNRAR_VER=7.2.3
+ARG UNRAR_SHA256=3995af0aa32b1505a566da053725551a1f0698dc42b2fdf7ba7d65db0d004e33
 ARG REMOVE_PLUGINS="rutracker_check _cloudflare mediainfo screenshots spectrogram geoip"
 
 # ==========================================
@@ -72,11 +73,12 @@ RUN <<EOF
 EOF
 
 # Build Unrar
-ARG UNRAR_VER
+ARG UNRAR_VER UNRAR_SHA256
 RUN <<EOF
   set -e
 
   curl -Lsf -o /tmp/unrarsrc.tar.gz "https://www.rarlab.com/rar/unrarsrc-${UNRAR_VER}.tar.gz"
+  echo "${UNRAR_SHA256}  /tmp/unrarsrc.tar.gz" | sha256sum -c -
   mkdir -p /tmp/unrar-src
   tar -xzf /tmp/unrarsrc.tar.gz -C /tmp/unrar-src --strip-components=1
 
@@ -161,7 +163,6 @@ USER ops
 WORKDIR /config
 ENV NITRO_SOCK=/run/ops/nitro.sock
 ENV TERM=dumb
-EXPOSE 8080 6881 50000
+EXPOSE 8080 50000 6881/udp
 
 ENTRYPOINT ["/usr/bin/nitro", "/etc/nitro"]
-
