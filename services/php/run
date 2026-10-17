@@ -1,3 +1,5 @@
 #!/bin/sh
+set -eu
 
+mkdir -p /config/rutorrent/share/settings /config/rutorrent/share/torrents
 exec php-fpm83 -F

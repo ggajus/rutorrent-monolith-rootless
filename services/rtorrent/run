@@ -1,5 +1,6 @@
 #!/bin/sh
+set -eu
 
+mkdir -p /config/rtorrent/.session
 rm -f /config/rtorrent/.session/rtorrent.lock
 exec rtorrent -n -o import=/etc/rtorrent.rc
-2>&1

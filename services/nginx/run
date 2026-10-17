@@ -12,10 +12,10 @@ if [ -n "$HTTP_USERNAME" ] && [ -n "$HTTP_PASSWORD" ]; then
     # Generate the password file
     #htpasswd -cb "$HTPASSWD" "$HTTP_USERNAME" "$HTTP_PASSWORD"
     printf "%s:%s\n" "$HTTP_USERNAME" "$(mkpasswd -m sha-512 "$HTTP_PASSWORD")" > "$HTPASSWD"
-    
+
     AUTH_STR="auth_basic \"Restricted\"; auth_basic_user_file $HTPASSWD;"
 
-    case "${AUTH_LEVEL}" in
+    case "${AUTH_LEVEL:-ALL}" in
         "WEBUI")
             echo "$AUTH_STR" > "$WEB_CONF"
             echo "Auth enabled for Web UI only."
@@ -30,7 +30,8 @@ if [ -n "$HTTP_USERNAME" ] && [ -n "$HTTP_PASSWORD" ]; then
             echo "Auth enabled for RPC2 and Web UI"
             ;;
         *)
-            echo "AUTH_LEVEL not set or invalid, defaulting to no auth."
+            echo "Invalid AUTH_LEVEL '${AUTH_LEVEL}', expected WEBUI, RPC2 or ALL." >&2
+            exit 1
             ;;
     esac
 fi

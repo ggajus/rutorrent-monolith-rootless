@@ -23,9 +23,7 @@ wget https://codeberg.org/gajus/rutorrent-monolith-rootless/raw/branch/main/comp
 
 ### 2. Create Required Mount Folders
 ```bash
-mkdir -p ./volumes/downloads
-mkdir -p ./volumes/config/rtorrent/.session
-mkdir -p ./volumes/config/rutorrent/share/{settings,torrents}
+mkdir -p ./volumes/config ./volumes/downloads
 ```
 
 ### 3a. Start Using Podman Compose
@@ -61,7 +59,7 @@ The `latest` tag points to the latest tested stable version. The `unstable` tag 
 - `/config`: State directory (sessions, settings, state files)
 
 ## Ports
-- `6881`: rTorrent DHT
+- `6881 (UDP)`: rTorrent DHT
 - `8080`: ruTorrent web UI
 - `50000`: rTorrent incoming
 
@@ -78,7 +76,7 @@ The image includes a minimal rTorrent rc configuration file. All further configu
 | :--- | :--- | :--- |
 | `HTTP_USERNAME` | Username for HTTP Basic Authentication. | (None) |
 | `HTTP_PASSWORD` | Password for HTTP Basic Authentication. | (None) |
-| `AUTH_LEVEL` | HTTP Basic Auth Scope: `WEBUI`, `RPC2`, or `ALL`. | (None) |
+| `AUTH_LEVEL` | HTTP Basic Auth Scope: `WEBUI`, `RPC2`, or `ALL`. | ALL if credentials are set |
 
 ## Credits
 Inspired by [CrazyMax’s rtorrent-rutorrent image](https://github.com/crazy-max/docker-rtorrent-rutorrent) and [home-operations containers](https://github.com/home-operations/containers).
