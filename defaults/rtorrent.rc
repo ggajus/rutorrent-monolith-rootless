@@ -22,9 +22,8 @@ execute.nothrow = chmod, 770, /run/ops/rtorrent.sock
 
 # Logging
 log.open_file = "rtorrent_log", /config/rtorrent/rtorrent.log
-log.add_output = "debug", "rtorrent_log"
-log.add_output = "error", "rtorrent_log"
-log.add_output = "critical", "rtorrent_log"
+log.add_output = "debug_trace", "rtorrent_log"
+log.add_output = "errors", "rtorrent_log"
 
 # Import custom rtorrent.rc
 try_import = /config/rtorrent.custom
